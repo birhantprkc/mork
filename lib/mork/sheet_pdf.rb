@@ -87,6 +87,7 @@ module Mork
       pages = @duplex ? :odd : :all
 
       repeat(pages) { question_numbers }
+      repeat(pages) { choice_headers } if @grip.crossbox?
 
       repeat(pages) { choice_cells(ch_len.first) } if equal_choice_number?
 
@@ -160,6 +161,22 @@ module Mork
       end
     end
 
+    def choice_headers
+      columns = @grip.options[:items][:columns].to_i
+      columns.times do |column|
+        @grip.max_choices_per_question.times do |choice|
+          font_size @grip.item_font_size do
+            text_box letter_for(choice),
+                     at: item_text_at(@grip.choice_header_xy(column, choice)),
+                     width: @grip.width_of_cell,
+                     height: @grip.height_of_cell,
+                     align: :center,
+                     valign: :center
+          end
+        end
+      end
+    end
+
     def choice_cells(n_ch)
       n_ch.each_with_index do |n, i|
         stamp_at "s#{n}", @grip.item_xy(i)
@@ -170,7 +187,11 @@ module Mork
       create_choice_stamps
       create_identity_stamps if @grip.identity?
       create_stamp('X') do
-        cell_stamp_content 'X', 0
+        if @grip.crossbox?
+          crossbox_cell_content 0, crossed: true
+        else
+          cell_stamp_content 'X', 0
+        end
       end
       create_stamp('barcode') do
         fill do
@@ -206,8 +227,25 @@ module Mork
       ch_len.flatten.uniq.each do |t|
         create_stamp("s#{t}") do
           t.times do |i|
-            cell_stamp_content letter_for(i), @grip.choice_spacing*i
+            if @grip.crossbox?
+              crossbox_cell_content @grip.choice_spacing*i
+            else
+              cell_stamp_content letter_for(i), @grip.choice_spacing*i
+            end
           end
+        end
+      end
+    end
+
+    def crossbox_cell_content(x, crossed: false)
+      width = @grip.width_of_cell
+      height = @grip.height_of_cell
+
+      stroke do
+        rectangle [x, 0], width, height
+        if crossed
+          stroke_line [x, 0], [x + width, -height]
+          stroke_line [x, -height], [x + width, 0]
         end
       end
     end

@@ -61,6 +61,14 @@ module Mork
       @params[:items][:threshold].to_f
     end
 
+    def crossbox?
+      @params[:crossbox] == true
+    end
+
+    def crossbox_inset
+      @params[:crossbox_inset].to_f
+    end
+
     # True when an optional responder identity grid is configured.
     def identity?
       @params.key?(:identity)

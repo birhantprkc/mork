@@ -46,9 +46,19 @@ module Mork
       choice_cell_areas[q][c]
     end
 
+    def crossbox_choice_cell_area(q, c)
+      crossbox_inset_area cell_x(q, c), cell_y(q), cell_width, cell_height
+    end
+
     def calibration_cell_areas
       rows.times.map do |q|
         coord cal_cell_x, cell_y(q), cell_width, cell_height
+      end
+    end
+
+    def crossbox_calibration_cell_areas
+      rows.times.map do |q|
+        crossbox_inset_area cal_cell_x, cell_y(q), cell_width, cell_height
       end
     end
 
@@ -83,6 +93,15 @@ module Mork
 
     def coord(x, y, w, h, cX=cx, cY=cy)
       Coord.new w, h: h, x: x, y: y, cx: cX, cy: cY
+    end
+
+    def crossbox_inset_area(x, y, width, height)
+      inset = crossbox_inset
+      if inset.negative? || inset * 2 >= [width, height].min
+        fail ArgumentError, 'crossbox_inset must be non-negative and less than half the cell dimensions'
+      end
+
+      coord x + inset, y + inset, width - inset * 2, height - inset * 2
     end
 
     # iterationless x registration

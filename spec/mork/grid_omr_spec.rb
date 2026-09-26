@@ -18,6 +18,26 @@ module Mork
       end
     end
 
+    describe '#crossbox_choice_cell_area' do
+      it 'insets the evaluation area by the configured layout margin' do
+        grom = GridOMR.new({ crossbox_inset: 0.5 }).set_page_size(1601, 2281)
+        cell = grom.choice_cell_area(0, 0)
+        interior = grom.crossbox_choice_cell_area(0, 0)
+
+        expect(interior.x).to be > cell.x
+        expect(interior.y).to be > cell.y
+        expect(interior.w).to be < cell.w
+        expect(interior.h).to be < cell.h
+      end
+
+      it 'rejects an inset that eliminates the cell interior' do
+        grom = GridOMR.new({ crossbox_inset: 2.5 }).set_page_size(1601, 2281)
+
+        expect { grom.crossbox_choice_cell_area(0, 0) }
+          .to raise_error(ArgumentError, /crossbox_inset/)
+      end
+    end
+
     describe '#barcode_bit_area' do
       it 'returns the coordinates of the first barcode bit area' do
         expect(@grom.barcode_bit_area(0)).to have_coords(126, 2260, 25, 21)

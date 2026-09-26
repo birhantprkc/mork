@@ -1,3 +1,5 @@
+crossbox: false        # use square cells marked with an X instead of rounded lettered cells
+crossbox_inset: 0.5    # crossbox OMR inset from each cell border, in mm
 page_size:             # all measurements in mm
   width:        210    # width of the paper sheet
   height:       297    # height of the paper sheet

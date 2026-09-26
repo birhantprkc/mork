@@ -41,6 +41,7 @@ module Mork
       @choxq =  choxq.map { |ncho| (0...ncho).to_a }
       # if set_ch is called more than once, discard memoization
       @marked_choices = @choice_mean_darkness = nil
+      @crossbox_choice_cross_darkness = @crossbox_choice_off_cross_darkness = nil
     end
 
     def choice_mean_darkness
@@ -51,10 +52,14 @@ module Mork
 
     def marked
       @marked_choices ||= begin
-        choice_mean_darkness.map do |cho|
-          [].tap do |choices|
-            cho.map.with_index do |drk, c|
-              choices << c if drk < choice_threshold
+        if @grom.crossbox?
+          crossbox_marked
+        else
+          choice_mean_darkness.map do |cho|
+            [].tap do |choices|
+              cho.map.with_index do |drk, c|
+                choices << c if drk < choice_threshold
+              end
             end
           end
         end
@@ -98,7 +103,7 @@ module Mork
               else
                 fail ArgumentError, 'Invalid overlay argument “where”'
               end
-      round = where != :barcode
+      round = where != :barcode && !@grom.crossbox?
       unless @mack.respond_to?(what)
         fail ArgumentError, 'Invalid overlay argument “what”'
       end
@@ -147,6 +152,55 @@ module Mork
       @choice_threshold ||= begin
         dcm = choice_mean_darkness.flatten.min
         (cal_cell_mean-dcm) * @grom.choice_threshold + dcm
+      end
+    end
+
+    def crossbox_marked
+      cross_threshold = crossbox_cross_threshold
+      fill_threshold = crossbox_fill_threshold
+
+      crossbox_choice_cross_darkness.map.with_index do |crosses, q|
+        crosses.each_with_index.filter_map do |darkness, c|
+          c if darkness < cross_threshold &&
+               crossbox_choice_off_cross_darkness[q][c] >= fill_threshold
+        end
+      end
+    end
+
+    def crossbox_cross_threshold
+      sensitivity = [@grom.choice_threshold + 0.1, 1.0].min
+      calibration_cross_darkness +
+        (calibration_off_cross_darkness - calibration_cross_darkness) * sensitivity
+    end
+
+    def crossbox_fill_threshold
+      calibration_off_cross_darkness +
+        (calibration_cross_darkness - calibration_off_cross_darkness) * @grom.choice_threshold
+    end
+
+    def crossbox_choice_cross_darkness
+      @crossbox_choice_cross_darkness ||= itemator(@choxq) do |q, c|
+        reg_pixels.average_cross @grom.crossbox_choice_cell_area(q, c)
+      end
+    end
+
+    def crossbox_choice_off_cross_darkness
+      @crossbox_choice_off_cross_darkness ||= itemator(@choxq) do |q, c|
+        reg_pixels.average_off_cross @grom.crossbox_choice_cell_area(q, c)
+      end
+    end
+
+    def calibration_cross_darkness
+      @calibration_cross_darkness ||= begin
+        areas = @grom.crossbox_calibration_cell_areas
+        areas.map { |area| reg_pixels.average_cross(area) }.sum / areas.length.to_f
+      end
+    end
+
+    def calibration_off_cross_darkness
+      @calibration_off_cross_darkness ||= begin
+        areas = @grom.crossbox_calibration_cell_areas
+        areas.map { |area| reg_pixels.average_off_cross(area) }.sum / areas.length.to_f
       end
     end
 

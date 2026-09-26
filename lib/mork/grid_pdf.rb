@@ -66,6 +66,14 @@ module Mork
       [item_x(q).mm, item_y(q).mm]
     end
 
+    def choice_header_xy(column, choice)
+      first_cell = item_xy(column * rows)
+      [
+        first_cell[0] + choice_spacing * choice,
+        first_cell[1] + @params[:items][:y_spacing].to_f.mm
+      ]
+    end
+
     def cround
       @cround ||= [width_of_cell, height_of_cell].min / 2
     end

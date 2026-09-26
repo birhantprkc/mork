@@ -107,6 +107,13 @@ module Mork
       s.save dest 'minimal'
     end
 
+    it 'outputs the default 5-by-120 response grid in crossbox mode' do
+      pdf = SheetPDF.new({}, { crossbox: true })
+
+      expect(pdf.instance_variable_get('@grip').crossbox?).to be true
+      pdf.save dest('crossbox')
+    end
+
     it 'creates a PDF sheet with a big barcode' do
       s = SheetPDF.new({barcode: 183251937962})
       s.save dest 'bigbarcode'

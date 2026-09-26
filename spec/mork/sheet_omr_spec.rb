@@ -3,6 +3,24 @@ require 'fileutils'
 
 module Mork
   describe SheetOMR do
+    describe 'crossbox scoring' do
+      it 'recognizes the intended choices from the crossbox test sheet' do
+        omr = SheetOMR.new 'spec/samples/crossbox-test.pdf', crossbox: true
+
+        expect(omr.valid?).to be true
+        expect(omr.marked_letters_unique.first(5)).to eq %w[C A B D B]
+        expect(omr.marked_letters_unique[7]).to eq 'B'
+        expect(omr.marked_letters_unique.last(5)).to eq ['B', 'E', '', 'A', 'C']
+      end
+
+      it 'writes a green-highlighted copy of the crossbox test sheet' do
+        omr = SheetOMR.new 'spec/samples/crossbox-test.pdf', crossbox: true
+
+        omr.overlay :highlight_green
+        omr.save 'spec/out/crossbox-test-highlight-green.jpg'
+      end
+    end
+
     describe '#identity' do
       def identity_omr(marks)
         omr = SheetOMR.allocate

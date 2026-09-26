@@ -143,6 +143,7 @@ The layout hash is put together in 3 steps during `SheetPDF` initialization:
 This is the list of built-in values that the layout is initially based on. Please note that the parameters with an (*) in the comment have no effect on PDF production, but are relevant to OMR scan (see further below).
 
 ```yaml
+crossbox:       false  # use square empty cells; an X selects a choice and filling it voids it
 page_size:             # all measurements in mm
   width:        210    # width of the paper sheet
   height:       297    # height of the paper sheet
@@ -394,6 +395,22 @@ items:
 ```
 
 If Mork fails to register/mark scoring sheets that you believe **should** be valid, please open an issue and attach a sample image.
+
+Set the top-level layout option `crossbox: true` to use square, empty response
+cells instead of rounded cells labelled A, B, C, etc. A hand-drawn diagonal X
+selects a cell; filling the cell voids it, even if the fill also covers the X.
+The optional `crossbox_inset` layout value (in mm, default `0.5`) shrinks the
+OMR evaluation area equally from each cell edge, helping exclude printed
+borders that may shift into the cell due to acquisition distortion. Set it to
+`0` to evaluate the full cell area.
+The PDF's calibration cells contain matching printed diagonal crosses. During
+OMR, Mork compares diagonal darkness with the remaining inset interior using
+calibration-relative thresholds: a cross darkens the diagonals, while filling
+the box darkens the rest of its interior and voids the choice. The existing
+`items.threshold` controls cross sensitivity and fill detection.
+Each item column has an A-to-`max_cells` letter header aligned above its cells;
+the letters use the same font size as the item numbers. Choices are identified
+by their left-to-right position.
 
 ## API Reference
 The online rubygems docs are [here](http://www.rubydoc.info/gems/mork)

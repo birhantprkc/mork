@@ -24,6 +24,13 @@ module Mork
         end
       end
 
+      describe '#crossbox?' do
+        it 'is disabled by default and can be enabled in the layout' do
+          expect(Grid.new.crossbox?).to be false
+          expect(Grid.new({ crossbox: true }).crossbox?).to be true
+        end
+      end
+
       describe '#barcode_bits' do
         it 'returns the number of bits used to define the form barcode' do
           expect(Grid.new.send(:barcode_bits)).to eq base[:barcode][:bits]

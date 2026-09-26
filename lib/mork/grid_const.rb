@@ -5,6 +5,9 @@ module Mork
     # default units are millimiters
     def default_grid
       {
+        # response marking style: rounded lettered cells or square crossboxes
+        crossbox: false,
+        crossbox_inset: 0.5, # inset from each cell edge for crossbox OMR, in mm
         # size of the paper sheet
         page_size: {
           width:      210, # A4

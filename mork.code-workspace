@@ -19,6 +19,12 @@
         "username": "root",
         "password": ""
       }
-    ]
+    ],
+    "chat.tools.terminal.autoApprove": {
+      "magick": true,
+      "pdfinfo": true,
+      "pdftotext": true,
+      "identify": true
+    }
   }
 }
