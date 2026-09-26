@@ -27,7 +27,7 @@ module Mork
 
     # Puts out the Grid parameters in YAML format; the entire hash is displayed
     # if no arguments are given; you can specify what to show by passing one of:
-    # :page_size, :reg_marks, :header, :items, :barcode
+    # :page_size, :reg_marks, :header, :items, :barcode, :identity
     def show(subset=nil)
       out = subset ? @params[subset] : @params
       puts out.to_yaml
@@ -59,6 +59,15 @@ module Mork
 
     def choice_threshold
       @params[:items][:threshold].to_f
+    end
+
+    # True when an optional responder identity grid is configured.
+    def identity?
+      @params.key?(:identity)
+    end
+
+    def identity_digits
+      @params[:identity][:digits].to_i
     end
 
     #====================#
@@ -121,12 +130,19 @@ module Mork
     def page_height()      @params[:page_size][:height].to_f   end
     def reg_margin()       @params[:reg_marks][:margin].to_f   end
     def reg_radius()       @params[:reg_marks][:radius].to_f   end
-    def uid_digits()       @params[:uid][:digits].to_i         end
-    def uid_x()            @params[:uid][:left].to_f           end
-    def uid_y()            @params[:uid][:top].to_f            end
-    def uid_width()        @params[:uid][:width].to_f          end
-    def uid_height()       @params[:uid][:height].to_f         end
-    def uid_cell_width()   @params[:uid][:cell_width].to_f     end
-    def uid_cell_height()  @params[:uid][:cell_height].to_f    end
+    def identity_x()             @params[:identity][:left].to_f                end
+    def identity_y()             @params[:identity][:top].to_f                 end
+    def identity_cell_width()    @params[:identity][:cell_width].to_f          end
+    def identity_cell_height()   @params[:identity][:cell_height].to_f         end
+    def identity_x_spacing()     @params[:identity][:x_spacing].to_f           end
+    def identity_y_spacing()     @params[:identity][:y_spacing].to_f           end
+
+    def identity_cell_x(digit)
+      identity_x + identity_x_spacing * digit - identity_cell_width / 2
+    end
+
+    def identity_cell_y(row)
+      identity_y + identity_y_spacing * row - identity_cell_height / 2
+    end
   end
 end

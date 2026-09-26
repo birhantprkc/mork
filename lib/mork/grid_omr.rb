@@ -56,6 +56,16 @@ module Mork
       coord barcode_bit_x(bit), barcode_y, barcode_width, barcode_height
     end
 
+    def identity_cell_areas
+      return [] unless identity?
+
+      @identity_cell_areas ||= identity_digits.times.map do |row|
+        10.times.map do |digit|
+          coord identity_cell_x(digit), identity_cell_y(row), identity_cell_width, identity_cell_height
+        end
+      end
+    end
+
     def rm_crop_area(corner)
       coord rx(corner), ry(corner), reg_crop, reg_crop, ppu_x, ppu_y
     end

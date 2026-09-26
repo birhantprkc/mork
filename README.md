@@ -185,6 +185,27 @@ barcode:
   spacing:        4    # horizontal distance between adjacent barcode bit centers
 ```
 
+To collect a responder identifier, add an optional `identity` section. It
+draws one row per identifier digit, with cells labelled 0 through 9 from left
+to right. `left` and `top` locate the center of the first (`0`) cell relative
+to the top-left registration mark; spacing is measured center-to-center.
+
+```yaml
+identity:
+  digits:        6    # number of identifier digits (and grid rows)
+  left:        120    # first cell center, relative to registration frame left
+  top:          30    # first row center, relative to registration frame top
+  cell_width:    4
+  cell_height:   3
+  x_spacing:     5    # horizontal distance between digit cell centers
+  y_spacing:     5    # vertical distance between row centers
+```
+
+When `identity` is omitted, no identification grid is rendered. On a
+registered scan, `SheetOMR#identity` returns the encoded identifier as an
+integer. It returns `nil` when the grid is absent or if a row is blank or has
+more than one marked digit.
+
 A `layout.yml` file may be used on top of the above to always apply settings that you would consider your own defaults. A good example might be to override the built-in A4 paper size with Letter paper width and height. For example, if everthing in the built-in layout fits your needs except for paper size, the `layout.yml` file should contain just the following:
 
 ```yaml

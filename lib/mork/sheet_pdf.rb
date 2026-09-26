@@ -93,6 +93,7 @@ module Mork
       repeat(pages) do
         calibration_cell_repeater
         registration_mark_repeater
+        identity_repeater if @grip.identity?
       end
     end
 
@@ -106,6 +107,14 @@ module Mork
 
     def calibration_cell_repeater
       @grip.calibration_cells_xy.each { |c| stamp_at 'X', c }
+    end
+
+    def identity_repeater
+      @grip.identity_digits.times do |row|
+        10.times do |digit|
+          stamp_at "identity-#{digit}", @grip.identity_cell_xy(row, digit)
+        end
+      end
     end
 
     def barcode(code)
@@ -159,6 +168,7 @@ module Mork
 
     def create_stamps
       create_choice_stamps
+      create_identity_stamps if @grip.identity?
       create_stamp('X') do
         cell_stamp_content 'X', 0
       end
@@ -169,21 +179,27 @@ module Mork
       end
     end
 
-    def create_uid_stamps
-      create_stamp('uid') do
-        10.times do |i|
-          offx = uid_spacing_x * i
-          stroke_rounded_rectangle [offx, 0],
-                                   @grip.width_of_uid,
-                                   @grip.height_of_uid,
-                                   @grip.uround
-          text_box i, at: item_text_at([offx, 0]),
-                      width: @grip.width_of_uid,
-                      height: @grip.height_of_uid,
-                      align: :center,
-                      valign: :center
+    def create_identity_stamps
+      10.times do |digit|
+        create_stamp("identity-#{digit}") do
+          stroke_rounded_rectangle [0, 0],
+                                   @grip.identity_cell_width_pdf,
+                                   @grip.identity_cell_height_pdf,
+                                   @grip.identity_cell_round
+          font_size identity_font_size do
+            text_box digit.to_s,
+                     at: item_text_at([0, 0]),
+                     width: @grip.identity_cell_width_pdf,
+                     height: @grip.identity_cell_height_pdf,
+                     align: :center,
+                     valign: :center
+          end
         end
       end
+    end
+
+    def identity_font_size
+      [@grip.item_font_size, @grip.identity_cell_height_pdf * 0.65].min
     end
 
     def create_choice_stamps

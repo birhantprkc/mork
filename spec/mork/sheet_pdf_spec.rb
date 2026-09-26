@@ -19,6 +19,28 @@ module Mork
       expect(sp.instance_variable_get('@grip')).to be_a GridPDF
     end
 
+    it 'renders an identity grid only when it is configured' do
+      without_identity = sp.instance_variable_get('@grip')
+      identity_layout = {
+        identity: {
+          digits: 6, left: 120, top: 15,
+          cell_width: 4, cell_height: 3,
+          x_spacing: 5, y_spacing: 5
+        }
+      }
+      with_identity_pdf = sp(grip: identity_layout)
+      with_identity = with_identity_pdf.instance_variable_get('@grip')
+      with_identity_pdf.save dest('identity-grid')
+
+      expect(without_identity.identity?).to be false
+      expect(with_identity.identity?).to be true
+      expect(with_identity.identity_cell_xy(5, 9)).to eq [163.mm, 238.5.mm]
+      # The identity grid occupies the top band; the first response row starts
+      # below it, so the two grids cannot overlap vertically.
+      expect(with_identity.send(:identity_cell_y, 5) + with_identity.send(:identity_cell_height) / 2)
+        .to be < with_identity.send(:cell_y, 0)
+    end
+
     it 'uses a yaml file as content' do
       s = 'spec/samples/content.yml'
       c = sp(cnt: s).instance_variable_get('@content')[0][:choices]

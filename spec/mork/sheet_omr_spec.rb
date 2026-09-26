@@ -3,6 +3,44 @@ require 'fileutils'
 
 module Mork
   describe SheetOMR do
+    describe '#identity' do
+      def identity_omr(marks)
+        omr = SheetOMR.allocate
+        mim = instance_double(Mimage, valid?: true, identity_marks: marks)
+        omr.instance_variable_set(:@mim, mim)
+        omr
+      end
+
+      it 'returns the number encoded by one marked digit in every row' do
+        expect(identity_omr([[0], [4], [2], [9]]).identity).to eq 429
+      end
+
+      it 'returns nil for a missing or ambiguous identity mark' do
+        expect(identity_omr(nil).identity).to be_nil
+        expect(identity_omr([[3], []]).identity).to be_nil
+        expect(identity_omr([[3], [1, 2]]).identity).to be_nil
+      end
+
+      it 'decodes the marked identity from the sample scan' do
+        layout = {
+          identity: {
+            digits: 6,
+            left: 120,
+            top: 15,
+            cell_width: 4,
+            cell_height: 3,
+            x_spacing: 5,
+            y_spacing: 5
+          }
+        }
+
+        omr = SheetOMR.new 'spec/samples/identity-test.pdf', layout
+
+        expect(omr.valid?).to be true
+        expect(omr.identity).to eq 243790
+      end
+    end
+
     context 'catching source file problems' do
       describe 'trying to process a non existing file' do
         it 'throws a file-not-found error' do

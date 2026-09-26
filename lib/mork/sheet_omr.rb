@@ -61,6 +61,20 @@ module Mork
       end.join.reverse
     end
 
+    # Responder's identity number encoded by the optional identity grid.
+    # Returns nil when the grid is absent, the sheet is unregistered, or any
+    # identity row is blank or has more than one marked digit.
+    #
+    # @return [Integer, nil]
+    def identity
+      return if not_registered
+
+      marks = @mim.identity_marks
+      return if marks.nil? || marks.any? { |row| row.length != 1 }
+
+      marks.flatten.join.to_i
+    end
+
     # Setting the choices/questions to analyze. If this function is not called,
     # the maximum number of choices/questions allowed by the layout will be
     # evaluated.

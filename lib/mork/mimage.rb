@@ -69,6 +69,18 @@ module Mork
       end
     end
 
+    # Marked digits for each identity row. A row with no mark or multiple
+    # marks is intentionally returned as-is so callers can reject ambiguity.
+    def identity_marks
+      return unless @grom.identity?
+
+      @identity_marks ||= identity_cell_areas.map do |row|
+        row.map.with_index do |area, digit|
+          digit if reg_pixels.average(area) < identity_threshold
+        end.compact
+      end
+    end
+
     def overlay(what, where)
       areas = case where
               when :barcode
@@ -145,6 +157,17 @@ module Mork
 
     def barcode_threshold
       @barcode_threshold ||= (paper_white + ink_black) / 2
+    end
+
+    def identity_cell_areas
+      @grom.identity_cell_areas
+    end
+
+    def identity_threshold
+      @identity_threshold ||= begin
+        darkness = identity_cell_areas.flatten.map { |area| reg_pixels.average(area) }.min
+        (cal_cell_mean - darkness) * @grom.choice_threshold + darkness
+      end
     end
 
     def ink_black

@@ -70,25 +70,23 @@ module Mork
       @cround ||= [width_of_cell, height_of_cell].min / 2
     end
 
-    # UIDs
-    def width_of_uid
-      uid_cell_width.mm
+    def identity_cell_xy(row, digit)
+      [
+        identity_cell_x(digit).mm,
+        (reg_frame_height - identity_cell_y(row)).mm
+      ]
     end
 
-    def height_of_uid
-      uid_cell_height.mm
+    def identity_cell_width_pdf
+      identity_cell_width.mm
     end
 
-    def uid_spacing_x
-      (uid_width / 11).mm
+    def identity_cell_height_pdf
+      identity_cell_height.mm
     end
 
-    def uid_spacing_y
-      (uid_height / (uid_digits+1)).mm
-    end
-
-    def uround
-      @uround ||= [width_of_uid, height_of_uid].min / 2
+    def identity_cell_round
+      @identity_cell_round ||= [identity_cell_width_pdf, identity_cell_height_pdf].min / 2
     end
 
     def missing_header?(k)

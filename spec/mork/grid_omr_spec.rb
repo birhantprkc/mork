@@ -28,6 +28,33 @@ module Mork
       end
     end
 
+    describe '#identity_cell_areas' do
+      let(:identity) do
+        {
+          digits: 2,
+          left: 20,
+          top: 30,
+          cell_width: 4,
+          cell_height: 3,
+          x_spacing: 5,
+          y_spacing: 6
+        }
+      end
+
+      it 'returns no areas when identity is not configured' do
+        expect(@grom.identity_cell_areas).to eq []
+      end
+
+      it 'places ten digit cells in every identity row' do
+        grom = GridOMR.new(identity: identity).set_page_size(1900, 2970)
+
+        expect(grom.identity_cell_areas.length).to eq 2
+        expect(grom.identity_cell_areas.first.length).to eq 10
+        expect(grom.identity_cell_areas[0][0]).to have_coords(180, 306, 40, 32)
+        expect(grom.identity_cell_areas[1][9]).to have_coords(630, 370, 40, 32)
+      end
+    end
+
     describe '#rm_crop_area' do
       it 'returns a Coord object for the :tl reg_mark corner' do
         c = @grom.rm_crop_area :tl
